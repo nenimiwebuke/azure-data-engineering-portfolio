@@ -453,6 +453,36 @@ This confirms a working, verified recovery path for accidental data loss, indepe
 
 ---
 
+## Semantic Search with pgvector
+
+Phase 2 of the Northstar PostgreSQL work adds the pgvector extension to demonstrate semantic similarity search alongside the relational schema built in Phase 1.
+
+The azure.extensions server parameter was enabled and brought under Terraform management via import, keeping infrastructure fully declarative rather than relying on undocumented CLI changes. A notes_embedding vector column was added to reconciliation_exceptions to hold an embedding of each row's free-text resolution_notes.
+
+Two demonstrations were run:
+
+    1. Hand-crafted vectors: five real exception rows were seeded with
+       manually constructed embeddings split into two deliberate clusters
+       (eligibility-timing issues vs. duplicate-eligibility issues). A
+       similarity query using pgvector's <-> (Euclidean distance) operator
+       correctly grouped same-cluster rows together with small distances
+       (0.05-0.11) and separated cross-cluster rows with much larger
+       distances (1.58+), confirming the mechanics of vector similarity
+       search independent of any external embedding model.
+
+    2. Indexed search at volume: 2,000 synthetic rows were generated
+       across the same two clusters to test search performance at
+       realistic scale. An exact nearest-neighbor query (sequential scan,
+       computing distance to every row) took 1.936ms. After building an
+       HNSW index (USING hnsw with vector_l2_ops), the identical query
+       dropped to 0.505ms - roughly 4x faster - with the query plan
+       switching from a sequential scan plus sort to a direct
+       distance-ordered index scan.
+
+HNSW was chosen over pgvector's alternative IVFFlat index type as the better default for most workloads, trading a small amount of recall (it performs approximate rather than exact nearest-neighbor search) for significantly better query speed and index build behavior. This tradeoff - approximate but fast versus exact but linear-cost - is the central design decision in vector search and is demonstrated here with real, measured numbers rather than asserted from documentation.
+
+---
+
 ## Architecture Documentation
 
 Detailed platform documentation is maintained alongside the implementation:
