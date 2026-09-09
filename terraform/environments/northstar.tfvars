@@ -28,3 +28,5 @@ data_lake_containers           = ["bronze", "silver", "gold"]
 
 databricks_name = "dbw-nenim-cloud-dba-dev"
 databricks_sku  = "trial"
+
+postgres_client_ip = "172.56.222.194"
