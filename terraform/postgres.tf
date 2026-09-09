@@ -14,7 +14,7 @@ resource "azurerm_key_vault_secret" "postgres_admin_password" {
 }
 
 resource "azurerm_resource_group" "postgres" {
-  name     = "rg-northstar-postgres"
+  name = "rg-northstar-postgres"
   # Postgres Flexible Server provisioning is restricted in eastus (the platform's
   # default region) for this subscription; eastus2 is the paired region and unrestricted.
   location = "eastus2"
@@ -23,9 +23,9 @@ resource "azurerm_resource_group" "postgres" {
 module "postgres" {
   source = "./modules/postgres-flexible-server"
 
-  server_name          = "psql-northstar-flex"
-  resource_group_name  = azurerm_resource_group.postgres.name
-  location             = azurerm_resource_group.postgres.location
+  server_name         = "psql-northstar-flex"
+  resource_group_name = azurerm_resource_group.postgres.name
+  location            = azurerm_resource_group.postgres.location
 
   admin_username = "northstaradmin"
   admin_password = random_password.postgres_admin.result
